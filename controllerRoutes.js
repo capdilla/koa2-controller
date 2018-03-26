@@ -4,32 +4,44 @@ const Router = require('koa-router')
  * find all the files in a path to get all the routes generated there
  * @param Object opts 
  */
-module.exports = (opts) => {
-
-  let options = {
-    path: '/../../app/controllers/',
-    regexToFile: /Controller/g
+class controllerRoutes {
+  constructor(opts) {
+    this.options = {
+      path: '/../../app/controllers/',
+      regexToFile: /Controller/g,
+      prefix: ''
+    }
+    this.options = { ...this.options, ...opts };
+    this.router = new Router({ prefix: this.options.prefix });
+    this.getRoutes();
   }
 
-  options = { ...options, ...opts };
+  getRoutes() {
+    var normalizedPath = require("path").join(__dirname, this.options.path);
 
-  var normalizedPath = require("path").join(__dirname, options.path);
+    let routes = [];
 
-  let routes = [];
+    require("fs").readdirSync(normalizedPath).forEach((file, key) => {
 
-  require("fs").readdirSync(normalizedPath).forEach((file, key) => {
+      if (this.options.regexToFile.test(file)) {
+        let moduleController = require(__dirname + this.options.path + file)
+        routes.push(new moduleController().getRoutes().routes())
+      }
 
-    if (options.regexToFile.test(file)) {
+    });
 
-      let moduleController = require(options.path + file)
-      routes.push(new moduleController().getRoutes().routes())
+    this.router.use(...routes);
+  }
 
-    }
+  routes() {
+    return this.router.routes();
+  }
 
-  });
+  get routerInsistence() {
+    return this.router;
+  }
 
-  const router = new Router()
-  return router.use(...routes);
+
 }
 
-
+module.exports = controllerRoutes;

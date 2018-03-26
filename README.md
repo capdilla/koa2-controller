@@ -39,14 +39,24 @@ class testController extends koa2Controller {
 
 Basic usage:
   `of controllerRoutes`
+  this get all the files in `/app/controllers/` by default 
+  
 
 ```javascript
   const Koa = require('koa');
   const app = new Koa();
 
-  //require this
-  const {controllerRoutes} = require('koa2-controller') 
-  app.use(controllerRoutes().routes())
+  //import this
+  const { controllerRoutes } = require('koa2-controller')
+  //find in the default path
+  app.use(new controllerRoutes().routes())
+
+  //find in a diferent path and diferent prefix
+  const privateControllers = new controllerRoutes({
+    path: '/../../app/controllers/privateControllers/',
+    prefix: '/v2'
+  })
+  app.use(privateControllers.routes())
 
   app.listen(3000, () => {
     console.log("listen")
