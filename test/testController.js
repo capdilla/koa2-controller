@@ -1,12 +1,11 @@
 const koa2Controller = require('../koa2Controller');
 const assert = require('chai').assert;
-const Router = require('koa-router')
-
+const Router = require('koa-router');
 
 class testController extends koa2Controller {
 
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
   }
 
   getHello(ctx, next) {
@@ -59,3 +58,5 @@ describe("test koa2-controller have to be the same at router", () => {
     assert.equal(testString, routerString);
   })
 })
+
+

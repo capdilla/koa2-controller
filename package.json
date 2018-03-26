@@ -4,7 +4,7 @@
   "description": "library to handle the routes and controller at same time",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --ui tdd"
   },
   "keywords": [
     "koa2",
