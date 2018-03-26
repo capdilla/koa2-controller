@@ -7,7 +7,7 @@ const Router = require('koa-router')
 module.exports = (opts) => {
 
   let options = {
-    path: '../app/controllers/',
+    path: '/../../app/controllers/',
     regexToFile: /Controller/g
   }
 
