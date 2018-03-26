@@ -1,7 +1,7 @@
-const controller = require('./koa2Controller');
+const koa2Controller = require('./koa2Controller');
 const controllerRoutes = require('./controllerRoutes');
 
 module.exports = {
-  controller,
+  koa2Controller,
   controllerRoutes
 }
