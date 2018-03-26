@@ -1,5 +1,9 @@
 const Router = require('koa-router')
 
+/**
+ * find all the files in a path to get all the routes generated there
+ * @param Object opts 
+ */
 module.exports = (opts) => {
 
   let options = {
