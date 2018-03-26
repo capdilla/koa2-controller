@@ -10,8 +10,9 @@ const {koa2Controller} = require('koa2-controller')
 
 class testController extends koa2Controller {
 
-  constructor() {
-    super()
+  //if you need to set parameters 
+  constructor(props) {
+    super(props)
   }
 
   //create a http get
@@ -48,8 +49,8 @@ Basic usage:
 
   //import this
   const { controllerRoutes } = require('koa2-controller')
-  //find in the default path
-  app.use(new controllerRoutes().routes())
+  //find in the default path and set props to the routes
+  app.use(new controllerRoutes({props:{ db:'db conection',...etc }}).routes())
 
   //find in a diferent path and diferent prefix
   const privateControllers = new controllerRoutes({

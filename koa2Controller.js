@@ -2,8 +2,9 @@ const Router = require('koa-router')
 
 class koa2Controller {
 
-  constructor() {
+  constructor(props) {
     this.prefix = '';
+    this.props = props;
   }
 
   /**
