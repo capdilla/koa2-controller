@@ -1,6 +1,12 @@
 # koa2-controller
 library to handle the routes and controller at same time
 
+##Installation
+for moment install like this
+```sh
+npm i git+https://github.com/capdilla/koa2-controller.git --save
+```
+
 **Example**  
 Basic usage:
   `of koa2Controller`
