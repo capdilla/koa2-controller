@@ -10,6 +10,7 @@ class controllerRoutes {
       path: '/../../app/controllers/',
       regexToFile: /Controller/g,
       prefix: '',
+      absolutePath: __dirname,
       props: {}
     }
     this.options = { ...this.options, ...opts };
@@ -18,15 +19,26 @@ class controllerRoutes {
   }
 
   getRoutes() {
-    var normalizedPath = require("path").join(__dirname, this.options.path);
+    var normalizedPath = require("path").join(this.options.absolutePath, this.options.path);
 
     let routes = [];
 
     require("fs").readdirSync(normalizedPath).forEach((file, key) => {
+      var re = new RegExp(this.regexToFile)
+      if (re.test(file)) {
 
-      if (this.options.regexToFile.test(file)) {
-        let moduleController = require(__dirname + this.options.path + file)
-        routes.push(new moduleController(this.options.props).getRoutes().routes())
+        let moduleController = require(this.options.absolutePath + this.options.path + file)
+        let controller = new moduleController(this.options.props)
+
+        routes.push(controller.getRoutes().routes())
+
+        if (controller.allowedMethods) {
+          if (typeof controller.allowedMethodsOptions == 'undefined') {
+            routes.push(controller.getRoutes().allowedMethods())
+          } else {
+            routes.push(controller.getRoutes().allowedMethods(controller.allowedMethodsOptions))
+          }
+        }
       }
 
     });
@@ -38,10 +50,13 @@ class controllerRoutes {
     return this.router.routes();
   }
 
-  get routerInsistence() {
-    return this.router;
+  allowedMethods(options) {
+    return this.router.allowedMethods(options);
   }
 
+  routerInstance() {
+    return this.router;
+  }
 
 }
 

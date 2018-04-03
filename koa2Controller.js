@@ -5,16 +5,19 @@ class koa2Controller {
   constructor(props) {
     this.prefix = '';
     this.props = props;
+
+    this.allowedMethods = true;
+    this.allowedMethodsOptions;
   }
 
-  /**
+  /*
    * this action execute before the function is call
    * @returns boolean
    * @param String method is the function that is invoke
    * @param Object ctx 
    * @param Object next 
    */
-  beforAction(method, ctx, next) { return true; }
+  beforeAction(method, ctx, next) { return true; }
 
   /**
    * this action execute after the function is call
@@ -36,9 +39,9 @@ class koa2Controller {
    */
   async dispatchAction(method, ctx, next, id) {
     let flag;
-    const beforAct = this.beforAction(ctx, next)
+    const beforeAct = this.beforeAction(ctx, next)
 
-    if (beforAct == true) {
+    if (beforeAct == true) {
 
       if (id) {
         flag = await this[method](id, ctx, next);
@@ -47,25 +50,26 @@ class koa2Controller {
       }
 
     } else {
-      return beforAct
+      return beforeAct
     }
 
-    const afterAct = this.afterAction(ctx, next)
+    const afterAct = this.afterAction(method, ctx, next)
 
     if (afterAct == true) {
       return flag;
     } else {
+      console.log("holaaasdasdjansodasno")
       return afterAct;
     }
 
-    return null;
   }
 
   /**
    * 
-   * return all the function has have get,post,del,put
+   * @returns all the function has have get,post,del,put
    */
   getAllFuncs() {
+
     let functions = [
       { type: 'get', name: '', regex: /^get+[A-Z]+.{1,}$/, methods: [] },
       { type: 'post', name: '', regex: /^post+[A-Z]+.{1,}$/, methods: [] },
@@ -84,7 +88,7 @@ class koa2Controller {
 
 
   /**
-   * return koa-router instance 
+   * @returns koa-router instance 
    */
   getRoutes() {
     const router = new Router({ prefix: this.prefix })
@@ -93,18 +97,22 @@ class koa2Controller {
 
       func.methods.forEach(method => {
 
+        let pathName = '/';
+        const methodName = method.replace(`${func.type}`, '').toLowerCase();
+
+        if (methodName != 'index') {
+          pathName = `/${methodName}`
+        }
+
         if (this.requireId(this[method])) {
+
           //create the http request `get|post|delete|put` with id
-          router[func.type]
-            (
-            `/${method.replace(`${func.type}`, '').toLowerCase()}/:id`,//name of the path
-            async (ctx, next) => this.dispatchAction(method, ctx, next, ctx.params.id) // function 
-            )
+          router[func.type](`${pathName}/:id`, async (ctx, next) => this.dispatchAction(method, ctx, next, ctx.params.id))
         } else {
           //create the http request `get|post|delete|put` without id
           router[func.type]
             (
-            `/${method.replace(`${func.type}`, '').toLowerCase()}`,//name of the path
+            `${pathName}`,//name of the path
             async (ctx, next) => this.dispatchAction(method, ctx, next) // function 
             )
         }
@@ -122,6 +130,7 @@ class koa2Controller {
    * valid if the function require id
    * return boolean
    * @param Function func 
+   * @returns boolean
    */
   requireId(func) {
     const parameters = this.getParameters(func);
@@ -129,19 +138,18 @@ class koa2Controller {
     if (valid) {
       return parameters.includes('id')
     }
-
   }
 
   /**
    * valid if the function contain the parameters in order id,ctx,next or ctx,next
    * @param {*} parameters 
+   * @returns boolean
    */
   validFunctionParameters(parameters) {
     if (parameters == 'id,ctx,next' || parameters == 'ctx,next' || parameters == 'ctx' || parameters == 'id,ctx') {
       return true
     } else {
       throw new Error(`Parameters order must be 'id,ctx,next' or 'ctx,next' the order is ${parameters}`)
-      return false
     }
 
   }

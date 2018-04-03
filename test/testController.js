@@ -1,6 +1,9 @@
 const koa2Controller = require('../koa2Controller');
 const assert = require('chai').assert;
 const Router = require('koa-router');
+const expect = require('chai').expect;
+const request = require('supertest');
+const http = require('http')
 
 class testController extends koa2Controller {
 
@@ -23,7 +26,6 @@ class testController extends koa2Controller {
   delUser(id, ctx) {
     return ctx.body = `user id : ${id} , deleted`
   }
-
 }
 
 
@@ -57,6 +59,112 @@ describe("test koa2-controller have to be the same at router", () => {
     const routerString = JSON.stringify(router.routes().router.stack[3]);
     assert.equal(testString, routerString);
   })
+
 })
 
+describe("koa2Controller Expected an error", () => {
+  it('throw error', () => {
+    class errorClass extends koa2Controller {
+      constructor() {
+        super()
+        this.prefix = '/'
+      }
+
+      getError(next, ctx) {
+        return ctx.body = "this is a error";
+      }
+    }
+    const errClass = new errorClass();
+    assert.throw(errClass.validFunctionParameters, Error, `Parameters order must be 'id,ctx,next' or 'ctx,next' the order is `)
+  })
+})
+
+
+
+describe("koa2Controller before and after action ", () => {
+  it('before action set false', () => {
+    class simpleClass extends koa2Controller {
+      constructor() {
+        super()
+      }
+
+      beforeAction(method, ctx, next) {
+        const user = { type: 'regular' }
+
+        if (user.type == 'admin') {
+          return true
+        } else {
+          ctx.status = 403;
+          return ctx.body = { error: "Forbidden" }
+        }
+
+      }
+
+      getIndex(ctx) {
+        return ctx.body = { foo: "this is a error" };
+      }
+    }
+
+    const sClass = new simpleClass();
+
+    //koa server
+    const Koa = require('koa');
+    const app = new Koa();
+
+    app.use(sClass.getRoutes().routes())
+    // app.use(sClass.allowedMethods())
+
+    request(http.createServer(app.callback()))
+      .get('/')
+      .expect(403)
+      .end((err, res) => {
+        if (err) return err;
+        assert.equal(res.body.error, 'Forbidden')
+      })
+
+  })
+
+  it('after action set false', () => {
+    class simpleClass extends koa2Controller {
+      constructor() {
+        super()
+      }
+
+      afterAction(method, ctx, next) {
+        const data = { response: false }
+
+        if (data.response) {
+          return true
+        } else {
+          ctx.status = 409;
+          return ctx.body = { error: "Your data was save but there some Conflict" }
+        }
+
+      }
+
+      getIndex(ctx) {
+        return ctx.body = { foo: "this is a error" };
+      }
+    }
+
+    const sClass = new simpleClass();
+
+    //koa server
+    const Koa = require('koa');
+    const app = new Koa();
+
+    app.use(sClass.getRoutes().routes())
+    // app.use(sClass.allowedMethods())
+
+    request(http.createServer(app.callback()))
+      .get('/')
+      .expect(409)
+      .end((err, res) => {
+        if (err) return err;
+        console.log(res.body)
+        assert.equal(res.body.error, 'Your data was save but there some Conflict')
+      })
+
+  })
+})
 
