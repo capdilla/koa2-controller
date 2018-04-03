@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/capdilla/koa2-controller.svg?branch=master)](https://travis-ci.org/capdilla/koa2-controller)
+
 # koa2-controller
 library to handle the routes and controller at same time
 
