@@ -74,7 +74,7 @@ Basic usage:
 
 
 ## Testing
-for moment install like this
+
 ```sh
 npm run test
 ```
