@@ -71,3 +71,10 @@ Basic usage:
     console.log("listen")
   })
 ```
+
+
+## Testing
+for moment install like this
+```sh
+npm run test
+```
