@@ -46,6 +46,8 @@ class testController extends koa2Controller {
   }
 }
 
+const test = new testController().getRoutes()
+
 describe("test koa2Controller for with correct response in http get|post|put|del", () => {
   //koa server
   const Koa = require('koa');
