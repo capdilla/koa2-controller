@@ -29,6 +29,12 @@ class koa2Controller {
   afterAction(method, ctx, next) { return true; }
 
   /**
+   * {actionName:string,rules:[array of rulesobject]}
+   * rulesObject = {name:string,type:string=>required}
+   */
+  paramsBehaviour() { return [] }
+
+  /**
    * 
    * handle and valid the action
    * @returns function
@@ -58,7 +64,6 @@ class koa2Controller {
     if (afterAct == true) {
       return flag;
     } else {
-      console.log("holaaasdasdjansodasno")
       return afterAct;
     }
 
@@ -87,6 +92,35 @@ class koa2Controller {
   }
 
 
+  async _findBehaviour(actionName, ctx, next) {
+    const arr = this.paramsBehaviour();
+
+    if (arr[actionName]) {
+      const rules = arr[actionName].rules;
+
+      let flag = true;
+      const { body } = ctx.request;
+
+      let response = { message: 'some elements are require', requires: [] };
+
+      rules.forEach(rule => {
+        if (!Object.keys(body).includes(rule.name)) {
+          flag = false;
+          response.requires.push(rule.name)
+        }
+      });
+
+      if (flag) {
+        return await next()
+      } else {
+        return ctx.body = response
+      }
+    } else {
+      return next()
+    }
+
+  }
+
   /**
    * @returns koa-router instance 
    */
@@ -103,6 +137,8 @@ class koa2Controller {
         if (methodName != 'index') {
           pathName = `/${methodName}`
         }
+
+        router.use(pathName, async (ctx, next) => this._findBehaviour(method, ctx, next))
 
         if (this.requireId(this[method])) {
 
@@ -135,9 +171,8 @@ class koa2Controller {
   requireId(func) {
     const parameters = this.getParameters(func);
     const valid = this.validFunctionParameters(parameters)
-    if (valid) {
-      return parameters.includes('id')
-    }
+
+    return parameters.includes('id')
   }
 
   /**

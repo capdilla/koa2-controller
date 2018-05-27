@@ -1,9 +1,12 @@
 const koa2Controller = require('../koa2Controller');
 const assert = require('chai').assert;
 const Router = require('koa-router');
+const bodyParser = require('koa-bodyparser');
+
 const expect = require('chai').expect;
 const request = require('supertest');
-const http = require('http')
+const http = require('http');
+
 
 class testController extends koa2Controller {
 
@@ -11,20 +14,36 @@ class testController extends koa2Controller {
     super(props)
   }
 
+  paramsBehaviour() {
+    return {
+      postCreate: {
+        rules: [
+          { name: 'mail', type: 'require' },
+          { name: 'password', type: 'require' },
+        ]
+      },
+
+    }
+  }
+
+  getIndex(ctx) {
+    return ctx.body = { message: "Hello world" }
+  }
+
   getHello(ctx, next) {
-    return ctx.body = "Hello world"
+    return ctx.body = { message: "Hello world" }
   }
 
   postCreate(ctx) {
-    return ctx.body = "created"
+    return ctx.body = { message: "created" }
   }
 
   putUser(id, ctx) {
-    return ctx.body = `user id : ${id} , updated`
+    return ctx.body = { message: `user id : ${id} , updated` }
   }
 
   delUser(id, ctx) {
-    return ctx.body = `user id : ${id} , deleted`
+    return ctx.body = { message: `user id : ${id} , deleted` }
   }
 }
 
@@ -38,27 +57,101 @@ router.del('/user/:id', async (ctx, next) => ctx.body = `user id : ${ctx.params.
 
 const test = new testController().getRoutes()
 
-describe("test koa2-controller have to be the same at router", () => {
-  it('test path /hello sould be same at router ', () => {
-    const testString = JSON.stringify(test.routes().router.stack[0]);
-    const routerString = JSON.stringify(router.routes().router.stack[0]);
-    assert.equal(testString, routerString);
-  });
-  it('test path post /create', () => {
-    const testString = JSON.stringify(test.routes().router.stack[1]);
-    const routerString = JSON.stringify(router.routes().router.stack[1]);
-    assert.equal(testString, routerString);
-  })
-  it('test path put /user', () => {
-    const testString = JSON.stringify(test.routes().router.stack[2]);
-    const routerString = JSON.stringify(router.routes().router.stack[2]);
-    assert.equal(testString, routerString);
-  })
-  it('test path del /user', () => {
-    const testString = JSON.stringify(test.routes().router.stack[3]);
-    const routerString = JSON.stringify(router.routes().router.stack[3]);
-    assert.equal(testString, routerString);
-  })
+// describe("test koa2-controller have to be the same at router", () => {
+//   it('test path /hello sould be same at router ', () => {
+//     const testString = JSON.stringify(test.routes().router.stack[0]);
+//     const routerString = JSON.stringify(router.routes().router.stack[0]);
+//     assert.equal(testString, routerString);
+//   });
+//   it('test path post /create', () => {
+//     const testString = JSON.stringify(test.routes().router.stack[1]);
+//     const routerString = JSON.stringify(router.routes().router.stack[1]);
+//     assert.equal(testString, routerString);
+//   })
+//   it('test path put /user', () => {
+//     const testString = JSON.stringify(test.routes().router.stack[2]);
+//     const routerString = JSON.stringify(router.routes().router.stack[2]);
+//     assert.equal(testString, routerString);
+//   })
+//   it('test path del /user', () => {
+//     const testString = JSON.stringify(test.routes().router.stack[3]);
+//     const routerString = JSON.stringify(router.routes().router.stack[3]);
+//     assert.equal(testString, routerString);
+//   })
+// })
+
+describe("test koa2Controller for with correct response in http get|post|put|del", () => {
+  //koa server
+  const Koa = require('koa');
+  const app = new Koa();
+
+  app.use(bodyParser())
+  app.use(test.routes())
+  // app.use(sClass.allowedMethods())
+
+  const server = http.createServer(app.callback())
+
+  it('http get /, return Hello World', () =>
+    request(server)
+      .get('/')
+      .set('Accept', 'application/json')
+      .expect(200)
+      .then(response => {
+        assert.equal(response.body.message, 'Hello world')
+      })
+  );
+
+  it('http get /hello, return Hello World', () =>
+    request(server)
+      .get('/hello')
+      .set('Accept', 'application/json')
+      .expect(200)
+      .then(response => {
+        assert.equal(response.body.message, 'Hello world')
+      })
+  );
+
+  it('http post /create, return created', () =>
+    request(server)
+      .post('/create')
+      .set('Accept', 'application/json')
+      .send({ mail: 'hello', password: 'password' })
+      .expect(200)
+      .then(response => {
+        assert.equal(response.body.message, 'created')
+      })
+  )
+
+  it('trow error post /create, return Hello World', () =>
+    request(server)
+      .post('/create')
+      .set('Accept', 'application/json')
+      .send({ mail: 'hello' })
+      .expect(200)
+      .then(response => {
+        assert.equal(response.body.message, 'some elements are require');
+        assert.isTrue(response.body.requires.includes('password'))
+      })
+  );
+
+  it('http put /user/10, return user id : 10 , updated', () =>
+    request(server)
+      .put('/user/10')
+      .expect(200)
+      .then(response => {
+        assert.equal(response.body.message, 'user id : 10 , updated');
+      })
+  );
+
+  it('http delete /user/10, return Hello World', () =>
+    request(server)
+      .del('/user/10')
+      .expect(200)
+      .then(response => {
+        assert.equal(response.body.message, 'user id : 10 , deleted');
+      })
+  );
+
 
 })
 
@@ -161,7 +254,6 @@ describe("koa2Controller before and after action ", () => {
       .expect(409)
       .end((err, res) => {
         if (err) return err;
-        console.log(res.body)
         assert.equal(res.body.error, 'Your data was save but there some Conflict')
       })
 
