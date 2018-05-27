@@ -22,7 +22,6 @@ class testController extends koa2Controller {
           { name: 'password', type: 'require' },
         ]
       },
-
     }
   }
 
@@ -46,39 +45,6 @@ class testController extends koa2Controller {
     return ctx.body = { message: `user id : ${id} , deleted` }
   }
 }
-
-
-const router = new Router({ prefix: this.prefix })
-
-router.get('/hello', async (ctx, next) => ctx.body = "Hello world")
-router.post('/create', async (ctx, next) => ctx.body = "created")
-router.put('/user/:id', async (ctx, next) => ctx.body = `user id : ${ctx.params.id} , updated`)
-router.del('/user/:id', async (ctx, next) => ctx.body = `user id : ${ctx.params.id} , deleted`)
-
-const test = new testController().getRoutes()
-
-// describe("test koa2-controller have to be the same at router", () => {
-//   it('test path /hello sould be same at router ', () => {
-//     const testString = JSON.stringify(test.routes().router.stack[0]);
-//     const routerString = JSON.stringify(router.routes().router.stack[0]);
-//     assert.equal(testString, routerString);
-//   });
-//   it('test path post /create', () => {
-//     const testString = JSON.stringify(test.routes().router.stack[1]);
-//     const routerString = JSON.stringify(router.routes().router.stack[1]);
-//     assert.equal(testString, routerString);
-//   })
-//   it('test path put /user', () => {
-//     const testString = JSON.stringify(test.routes().router.stack[2]);
-//     const routerString = JSON.stringify(router.routes().router.stack[2]);
-//     assert.equal(testString, routerString);
-//   })
-//   it('test path del /user', () => {
-//     const testString = JSON.stringify(test.routes().router.stack[3]);
-//     const routerString = JSON.stringify(router.routes().router.stack[3]);
-//     assert.equal(testString, routerString);
-//   })
-// })
 
 describe("test koa2Controller for with correct response in http get|post|put|del", () => {
   //koa server

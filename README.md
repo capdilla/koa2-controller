@@ -23,6 +23,17 @@ class testController extends koa2Controller {
     super(props)
   }
 
+  paramsBehaviour() {
+    return {
+      postCreate: {
+        rules: [
+          { name: 'mail', type: 'require' },// say to require this
+          { name: 'password', type: 'require' },
+        ]
+      },
+    }
+  }
+
   //create a http get
   getHello(ctx, next) {
     return ctx.body = "Hello world"
