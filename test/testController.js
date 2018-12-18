@@ -2,6 +2,8 @@ const koa2Controller = require('../koa2Controller');
 const assert = require('chai').assert;
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
+var views = require('koa-views');
+
 
 const expect = require('chai').expect;
 const request = require('supertest');
@@ -44,6 +46,12 @@ class testController extends koa2Controller {
   delUser(id, ctx) {
     return ctx.body = { message: `user id : ${id} , deleted` }
   }
+
+  allView(ctx) {
+    return ctx.renderView("index.ejs", { name: 'my awsome test' })
+  }
+
+
 }
 
 const test = new testController().getRoutes()
@@ -53,6 +61,7 @@ describe("test koa2Controller for with correct response in http get|post|put|del
   const Koa = require('koa');
   const app = new Koa();
 
+  app.use(views(__dirname + '/views', { map: { html: 'ejs' } }))
   app.use(bodyParser())
   app.use(test.routes())
   // app.use(sClass.allowedMethods())
@@ -117,6 +126,15 @@ describe("test koa2Controller for with correct response in http get|post|put|del
       .expect(200)
       .then(response => {
         assert.equal(response.body.message, 'user id : 10 , deleted');
+      })
+  );
+
+  it('http all /view, return a view ', () =>
+    request(server)
+      .get('/view')
+      .expect('Content-Type', /html/)
+      .then(response => {
+        assert.match(response.text, /hello my awsome test/)
       })
   );
 

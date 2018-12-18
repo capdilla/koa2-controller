@@ -10,7 +10,7 @@ const Koa = require('koa');
 const app = new Koa();
 
 const privateControllers = new controllerRoutes({
-  path: '/test/controllers/',
+  absolutePath: __dirname + '/controllers/',
 })
 
 privateControllers.routerInstance()

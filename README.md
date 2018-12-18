@@ -4,9 +4,8 @@
 library to handle the routes and controller at same time
 
 ## Installation
-for moment install like this
 ```sh
-npm i git+https://github.com/capdilla/koa2-controller.git --save
+npm i koa2-controller-router --save
 ```
 
 **Example**  
@@ -14,7 +13,7 @@ Basic usage:
   `of koa2Controller`
 
 ```javascript
-const {koa2Controller} = require('koa2-controller')
+const {koa2Controller} = require('koa2-controller-router')
 
 class testController extends koa2Controller {
 
@@ -54,6 +53,16 @@ class testController extends koa2Controller {
     return ctx.body = `user id : ${id} , deleted`
   }
 
+  /**
+   *  if you are using koa-views you can use the method renderView 
+   * to render a view that match, instead use ctx.render('folder/index.ejs') use ctx.render('index.ejs')
+   * your view have to be in a folder with the same name of the controller
+   * for example TestController the method match only Test in lower case
+  */
+  allView(ctx) {
+    return ctx.renderView("index.ejs", { name: 'my awsome test' })
+  }
+
 }
 ```
 
@@ -67,23 +76,22 @@ Basic usage:
   const app = new Koa();
 
   //import this
-  const { controllerRoutes } = require('koa2-controller')
+  const { controllerRoutes } = require('koa2-controller-router')
   //find in the default path and set props to the routes
   app.use(new controllerRoutes({props:{ db:'db conection',...etc }}).routes())
 
   //find in a diferent path and diferent prefix
   const privateControllers = new controllerRoutes({
-    path: '/../../app/controllers/privateControllers/',
+    absolutePath: __dirname + '/app/controllers/private/',
     prefix: '/v2'
   })
+  
   app.use(privateControllers.routes())
 
   app.listen(3000, () => {
     console.log("listen")
   })
 ```
-
-
 ## Testing
 
 ```sh

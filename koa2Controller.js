@@ -44,6 +44,7 @@ class koa2Controller {
    * @param Int id 
    */
   async dispatchAction(method, ctx, next, id) {
+    ctx.renderView = this.renderView.bind(this, ctx)
     let flag;
     const beforeAct = this.beforeAction(ctx, next)
 
@@ -79,7 +80,8 @@ class koa2Controller {
       { type: 'get', name: '', regex: /^get+[A-Z]+.{1,}$/, methods: [] },
       { type: 'post', name: '', regex: /^post+[A-Z]+.{1,}$/, methods: [] },
       { type: 'put', name: '', regex: /^put+[A-Z]+.{1,}$/, methods: [] },
-      { type: 'del', name: '', regex: /^del+[A-Z]+.{1,}$/, methods: [] }
+      { type: 'del', name: '', regex: /^del+[A-Z]+.{1,}$/, methods: [] },
+      { type: 'all', name: '', regex: /^all+[A-Z]+.{1,}$/, methods: [] }
     ];
 
     let props = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
@@ -194,7 +196,34 @@ class koa2Controller {
    * @param Function func 
    */
   getParameters(func) {
-    return new RegExp(func.name + '\\s*\\((.*?)\\)').exec(func.toString().replace(/\n/g, ''))[1].replace(/\/\*.*?\*\//g, '').replace(/ /g, '');
+    return new RegExp(func.name + '\\s*\\((.*?)\\)')
+      .exec(func.toString().replace(/\n/g, ''))[1]
+      .replace(/\/\*.*?\*\//g, '')
+      .replace(/ /g, '');
+  }
+
+
+  /**
+   * render a view based in the controller name 
+   * @param {string} fileName 
+   * @param {any} ctx
+   * @param {any} opts
+   */
+  async renderView(ctx, fileName, opts) {
+    if (ctx.render) {
+      const regex = /^(.+)(Controller)$/gm;
+      const { name } = this.constructor
+      let path;
+      let match = regex.exec(name)
+      if (match !== null) {
+        path = match[1];
+        return await ctx.render(`${path.toLocaleLowerCase()}/${fileName}`, opts)
+      } else {
+        throw new Error(`The constructor name dosen't match ${name}`)
+      }
+
+      // ctx.render()
+    }
   }
 
 }

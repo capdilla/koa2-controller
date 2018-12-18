@@ -7,10 +7,9 @@ const Router = require('koa-router')
 class controllerRoutes {
   constructor(opts) {
     this.options = {
-      path: '/../../app/controllers/',
       regexToFile: /Controller/g,
       prefix: '',
-      absolutePath: __dirname,
+      absolutePath: __dirname + '/app/controllers/',
       props: {}
     }
     this.options = { ...this.options, ...opts };
@@ -19,15 +18,14 @@ class controllerRoutes {
   }
 
   getRoutes() {
-    var normalizedPath = require("path").join(this.options.absolutePath, this.options.path);
+    var normalizedPath = require("path").join(this.options.absolutePath);
 
     let routes = [];
 
     require("fs").readdirSync(normalizedPath).forEach((file, key) => {
       var re = new RegExp(this.regexToFile)
       if (re.test(file)) {
-
-        let moduleController = require(this.options.absolutePath + this.options.path + file)
+        let moduleController = require(this.options.absolutePath + file)
         let controller = new moduleController(this.options.props)
 
         routes.push(controller.getRoutes().routes())
