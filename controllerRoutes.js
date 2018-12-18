@@ -1,4 +1,6 @@
-const Router = require('koa-router')
+const Router = require('koa-router');
+const path = require('path')
+
 
 /**
  * find all the files in a path to get all the routes generated there
@@ -9,7 +11,7 @@ class controllerRoutes {
     this.options = {
       regexToFile: /Controller/g,
       prefix: '',
-      absolutePath: __dirname + '/app/controllers/',
+      absolutePath: path.join(__dirname, '/../../' + 'app/controllers/'),
       props: {}
     }
     this.options = { ...this.options, ...opts };
@@ -18,7 +20,7 @@ class controllerRoutes {
   }
 
   getRoutes() {
-    var normalizedPath = require("path").join(this.options.absolutePath);
+    var normalizedPath = path.join(this.options.absolutePath);
 
     let routes = [];
 
