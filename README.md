@@ -66,6 +66,8 @@ class testController extends koa2Controller {
 }
 ```
 
+see test folder for more examples 
+
 Basic usage:
   `of controllerRoutes`
   this get all the files in `/app/controllers/` by default 

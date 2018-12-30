@@ -5,6 +5,7 @@ class koa2Controller {
   constructor(props) {
     this.prefix = '';
     this.props = props;
+    this.template = 'index.ejs';
 
     this.allowedMethods = true;
     this.allowedMethodsOptions;
@@ -217,12 +218,14 @@ class koa2Controller {
       let match = regex.exec(name)
       if (match !== null) {
         path = match[1];
-        return await ctx.render(`${path.toLocaleLowerCase()}/${fileName}`, opts)
+        let params = {
+          view: `${path.toLocaleLowerCase()}/${fileName}`,
+          ...opts
+        }
+        return await ctx.render(this.template, params)
       } else {
         throw new Error(`The constructor name dosen't match ${name}`)
       }
-
-      // ctx.render()
     }
   }
 

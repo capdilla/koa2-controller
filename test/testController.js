@@ -61,7 +61,7 @@ describe("test koa2Controller for with correct response in http get|post|put|del
   const Koa = require('koa');
   const app = new Koa();
 
-  app.use(views(__dirname + '/views', { map: { html: 'ejs' } }))
+  app.use(views(__dirname + '/template', { map: { html: 'ejs' } }))
   app.use(bodyParser())
   app.use(test.routes())
   // app.use(sClass.allowedMethods())
